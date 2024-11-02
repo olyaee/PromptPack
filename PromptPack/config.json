@@ -1,0 +1,6 @@
+{
+    "excluded_extensions": [".lock"],
+    "excluded_filenames":  ["final_prompt.txt"],
+    "file_extensions": []
+  }
+  

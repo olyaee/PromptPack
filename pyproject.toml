@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "promptpack"
+version = "0.1.0"
+description = "A tool for creating shareable folder structure and file content packs"
+authors = ["Ehsan Olyaee <olyaee.ehsan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langchain = "^0.2.16"
+fastapi = "^0.114.0"
+matplotlib = "^3.9.2"
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.1.1"
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+promptpack = "PromptPack.promptpack:main"
