@@ -1,6 +1,6 @@
 {
-    "excluded_extensions": [".lock"],
-    "excluded_filenames":  ["final_prompt.txt"],
-    "file_extensions": []
-  }
-  
+  "excluded_extensions": [".lock", "jpg", "mp3"],
+  "excluded_filenames": ["final_prompt.txt", "Learn_these_words.md"],
+  "excluded_foldernames": [".git", "__pycache__"],
+  "file_extensions": []
+}

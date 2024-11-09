@@ -3,6 +3,26 @@ import json
 import argparse
 from pathlib import Path
 
+def load_config(config_file="config.json"):
+    """
+    Load configuration from a JSON file.
+    Returns a dictionary with configuration values or defaults if the file doesn't exist.
+    """
+    default_config = {
+        "excluded_extensions": [".lock", ".git"],
+        "excluded_filenames": ["final_prompt.txt", ".git"],
+        "excluded_foldernames": [".git"],
+        "file_extensions": []
+    }
+    if os.path.exists(config_file):
+        try:
+            with open(config_file, "r") as f:
+                config = json.load(f)
+                return {**default_config, **config}  # Merge default config with loaded config
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Error reading config file ({e}), using default configuration.")
+    return default_config
+
 def generate_folder_structure(path, excluded_foldernames=None):
     folder_structure = "Project Folder Structure:\n"
     excluded_foldernames = excluded_foldernames or []
@@ -64,6 +84,9 @@ def save_to_file(filename, content):
     print(f"{filename} has been written.")
 
 def main():
+    # Load config
+    config = load_config()
+
     parser = argparse.ArgumentParser(description="Process a folder and read files with a specified configuration.")
     parser.add_argument(
         "folder", 
@@ -75,25 +98,25 @@ def main():
     parser.add_argument(
         "--include_extensions",
         nargs="*",
-        default=[],
+        default=config.get("file_extensions"),
         help="List of file extensions to include, e.g., '.py .md'."
     )
     parser.add_argument(
         "--excluded_extensions",
         nargs="*",
-        default=[".lock", ".git"],
+        default=config.get("excluded_extensions"),
         help="List of file extensions to exclude, e.g., '.lock .pyc'."
     )
     parser.add_argument(
         "--excluded_filenames",
         nargs="*",
-        default=["final_prompt.txt", ".git"],
+        default=config.get("excluded_filenames"),
         help="List of filenames to exclude, e.g., 'final_prompt.txt'."
     )
     parser.add_argument(
         "--excluded_foldernames",
         nargs="*",
-        default=[".git"],
+        default=config.get("excluded_foldernames"),
         help="List of folder names to exclude, e.g., '.git'."
     )
 
@@ -101,7 +124,7 @@ def main():
 
     project_path = args.folder
 
-    # Read files based on command-line arguments
+    # Read files based on command-line arguments and config
     files = read_files(
         project_path, 
         file_extensions=args.include_extensions, 
