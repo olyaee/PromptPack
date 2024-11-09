@@ -3,7 +3,7 @@ import json
 import argparse
 from pathlib import Path
 
-def load_config(config_file="config.json"):
+def load_config(config_file="./PromptPack/config.json"):
     """
     Load configuration from a JSON file.
     Returns a dictionary with configuration values or defaults if the file doesn't exist.
@@ -23,12 +23,24 @@ def load_config(config_file="config.json"):
             print(f"Error reading config file ({e}), using default configuration.")
     return default_config
 
-def generate_folder_structure(path, excluded_foldernames=None):
+def generate_folder_structure(path, excluded_foldernames=None, excluded_filenames=None, excluded_extensions=None):
     folder_structure = "Project Folder Structure:\n"
     excluded_foldernames = excluded_foldernames or []
-    
+    excluded_filenames = excluded_filenames or []
+    excluded_extensions = excluded_extensions or []
+
+    def should_exclude_entry(entry):
+        if entry.is_dir():
+            return entry.name in excluded_foldernames
+        else:
+            if entry.name in excluded_filenames:
+                return True
+            if any(entry.name.endswith(ext) for ext in excluded_extensions):
+                return True
+            return False
+
     def recurse_dir(current_path, prefix=""):
-        entries = [e for e in current_path.iterdir() if e.name not in excluded_foldernames]
+        entries = [e for e in sorted(current_path.iterdir()) if not should_exclude_entry(e)]
         for i, entry in enumerate(entries):
             connector = "└──" if i == len(entries) - 1 else "├──"
             folder_structure_line = f"{prefix}{connector} {entry.name}"
@@ -63,14 +75,19 @@ def read_files(project_path, file_extensions=None, excluded_extensions=None, exc
                 file_path = os.path.join(root, file_name)
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        files.append((os.path.basename(file_path), f.read()))
+                        files.append((os.path.relpath(file_path, project_path), f.read()))
                 except (UnicodeDecodeError, FileNotFoundError, IOError) as e:
                     print(f"Skipping file due to error ({e}): {file_path}")
                     
     return files
 
-def format_output(files, project_path, excluded_foldernames=None):
-    folder_structure = generate_folder_structure(project_path, excluded_foldernames)
+def format_output(files, project_path, excluded_foldernames=None, excluded_filenames=None, excluded_extensions=None):
+    folder_structure = generate_folder_structure(
+        project_path, 
+        excluded_foldernames=excluded_foldernames,
+        excluded_filenames=excluded_filenames,
+        excluded_extensions=excluded_extensions
+    )
     user_prompt = f"{folder_structure}\n\n" 
     for file_name, file_content in files:
         separator = f"\n==== START {file_name} ====\n"
@@ -134,7 +151,13 @@ def main():
     )
     
     # Format main content with folder structure and files
-    content = format_output(files, project_path, excluded_foldernames=args.excluded_foldernames)
+    content = format_output(
+        files, 
+        project_path, 
+        excluded_foldernames=args.excluded_foldernames,
+        excluded_filenames=args.excluded_filenames,
+        excluded_extensions=args.excluded_extensions
+    )
 
     save_to_file("final_prompt.txt", content)
 
