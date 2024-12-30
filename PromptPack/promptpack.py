@@ -97,6 +97,16 @@ def format_output(files, project_path, excluded_foldernames=None, excluded_filen
         separator = f"\n==== START {file_name} ====\n"
         end_separator = f"\n==== END {file_name} ====\n"
         user_prompt += f"{separator}{file_content}{end_separator}\n"
+    
+    # Add explanatory text at the end
+    explanation = """
+The text begins with a Project Folder Structure shown in a tree format, displaying:
+
+After the folder structure, each file is presented with clear delimiters:
+Files begin with "==== START filename ===="
+Files end with "==== END filename ===="."""
+    
+    user_prompt += explanation
     return user_prompt
 
 def save_to_file(filename, content):
