@@ -3,7 +3,7 @@ import json
 import argparse
 from pathlib import Path
 
-def load_config(config_file="./PromptPack/config.json"):
+def load_config(config_file=None):
     """
     Load configuration from a JSON file.
     Returns a dictionary with configuration values or defaults if the file doesn't exist.
@@ -14,6 +14,10 @@ def load_config(config_file="./PromptPack/config.json"):
         "excluded_foldernames": [".git"],
         "file_extensions": []
     }
+    
+    if config_file is None:
+        config_file = os.path.join(os.path.dirname(__file__), "config.json")
+    
     if os.path.exists(config_file):
         try:
             with open(config_file, "r") as f:
